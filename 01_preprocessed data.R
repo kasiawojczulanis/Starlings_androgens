@@ -155,24 +155,24 @@ nest_groups <- rfid_alldt_temp_df5_temp %>%
   select(file_name, sex, treatment) %>% 
   distinct() %>% 
   pivot_wider(values_from = treatment, names_from = sex) %>% 
-  mutate(fm_treatmet = paste0(female, "_", male, sep = "")) %>% 
-  select(file_name, fm_treatmet) 
+  mutate(fm_treatment = paste0(female, "_", male, sep = "")) %>% 
+  select(file_name, fm_treatment) 
 
 # summary table for exp groups
 nest_groups %>% 
-  group_by(fm_treatmet) %>% 
+  group_by(fm_treatment) %>% 
   summarise(n = n())
 
 rfid_alldt_temp_df6 <- left_join(rfid_alldt_temp_df5, nest_groups, by = "file_name")
 
 rfid_alldt_temp_df6 <- rfid_alldt_temp_df6  %>% 
   mutate(fm_treatment_pooled = case_when(
-    fm_treatmet == "control_NA" ~ "control_control",
-    fm_treatmet == "androgen_NA" ~ "androgen_control",
-    fm_treatmet == "NA_control" ~ "control_control",
-    fm_treatmet == "NA_androgen" ~ "control_androgen",
-    fm_treatmet == "NA_NA" ~ "control_control",
-    .default = as.character(fm_treatmet)
+    fm_treatment == "control_NA" ~ "control_control",
+    fm_treatment == "androgen_NA" ~ "androgen_control",
+    fm_treatment == "NA_control" ~ "control_control",
+    fm_treatment == "NA_androgen" ~ "control_androgen",
+    fm_treatment == "NA_NA" ~ "control_control",
+    .default = as.character(fm_treatment)
   ))
 
 
