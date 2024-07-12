@@ -6,6 +6,12 @@ library(tidyverse)
 library(tidyr)
 `%notin%` <- Negate(`%in%`)
 
+hours_blocks <- function(x) {
+  nhours <- length(rle(x)$values)
+  each_nhours <- rle(x)$lengths
+  rep(seq(1, nhours ,1), each_nhours)  
+} # requires already somehow grouped data; gives consecutive numbers for the distinguishable blocks
+
 
 # Read meta data data ----
 birdsID_df <- readxl::read_excel("C:/Users/User/Dropbox/VIP experiment/Files for VIP coordination.xlsx")
@@ -160,13 +166,6 @@ nest_groups %>%
 rfid_alldt_temp_df6 <- left_join(rfid_alldt_temp_df5, nest_groups, by = "file_name")
 
 # add hours/rec
-
-hours_blocks <- function(x) {
-  nhours <- length(rle(x)$values)
-  each_nhours <- rle(x)$lengths
-  rep(seq(1, nhours ,1), each_nhours)  
-}
-
 rfid_alldt_temp_df6 <- rfid_alldt_temp_df6 %>% 
   mutate(hr = hour(updated_date_time)) %>% 
   group_by(file_name) %>% 
@@ -177,5 +176,6 @@ rfid_alldt_temp_df6 <- rfid_alldt_temp_df6 %>%
   rename(date_time = updated_date_time,
          ind_treatment = treatment) %>% 
   select(-sx_treat)
+
 saveRDS(rfid_alldt_temp_df6, "01_preprocessed_data.rds")
 
