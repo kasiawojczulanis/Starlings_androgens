@@ -38,7 +38,7 @@ birdsID_dt <- bind_rows(birdsID_dt_females, birdsID_dt_males)
 nest_dt_females <- birdsID_df %>% 
   mutate(role = "female_parent",
          birdID = str_sub(female, 3, nchar(female))) %>% 
-  select(nest, year, hatch_date, wave, role, birdID, file_name, min_age) %>% 
+  select(nest, year, hatch_date, p6, p14, wave, role, birdID, file_name, min_age) %>% 
   distinct()
 
 nest_dt_males <- birdsID_df %>% 
@@ -165,6 +165,18 @@ nest_groups %>%
 
 rfid_alldt_temp_df6 <- left_join(rfid_alldt_temp_df5, nest_groups, by = "file_name")
 
+rfid_alldt_temp_df6 <- rfid_alldt_temp_df6  %>% 
+  mutate(fm_treatment_pooled = case_when(
+    fm_treatmet == "control_NA" ~ "control_control",
+    fm_treatmet == "androgen_NA" ~ "androgen_control",
+    fm_treatmet == "NA_control" ~ "control_control",
+    fm_treatmet == "NA_androgen" ~ "control_androgen",
+    fm_treatmet == "NA_NA" ~ "control_control",
+    .default = as.character(fm_treatmet)
+  ))
+
+
+
 # add hours/rec
 rfid_alldt_temp_df6 <- rfid_alldt_temp_df6 %>% 
   mutate(hr = hour(updated_date_time)) %>% 
@@ -176,6 +188,12 @@ rfid_alldt_temp_df6 <- rfid_alldt_temp_df6 %>%
   rename(date_time = updated_date_time,
          ind_treatment = treatment) %>% 
   select(-sx_treat)
+
+# fix chicks age
+rfid_alldt_temp_df6 <- rfid_alldt_temp_df6 %>% 
+  group_by(year, file_name) %>% 
+  fill(p6, .direction = "down")
+
 
 saveRDS(rfid_alldt_temp_df6, "01_preprocessed_data.rds")
 
