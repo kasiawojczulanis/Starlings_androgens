@@ -74,6 +74,7 @@ nfeeds_sel_f_effect <- nfeeds %>%
          wave %in% c(1, 1.5),
          year == 2012)
 
+saveRDS(nfeeds_sel_f_effect, "02_nfeeds_sel_f_effect.rds")
 
 # Stats (sample size)
 nfeeds_sel_f_effect %>% 
@@ -182,6 +183,7 @@ nfeeds_sel_m_effect <- nfeeds %>%
          year == 2013) %>% 
   filter(!is.na(sex))
 
+saveRDS(nfeeds_sel_m_effect, "02_nfeeds_sel_m_effect.rds")
 
 # Stats (sample size)
 nfeeds_sel_m_effect %>% 
@@ -280,21 +282,3 @@ ggsave("males_effect_female_partner.jpg", plot = last_plot())
 
 
 
-
-ggplot(nfeeds_sel_f_effect, 
-       aes(x = plot_treatment, y = p6)) +
-  geom_violin(trim = FALSE) + 
-  geom_jitter(size = 1, col = "grey") +
-  facet_wrap(~wave)
-       
-model <- glm(p6 ~ plot_treatment * wave, data = nfeeds_sel_f_effect, family = poisson(link = "log"))
-summary(model)
-
-ggplot(nfeeds_sel_m_effect, 
-       aes(x = plot_treatment, y = p6)) +
-  geom_violin(trim = FALSE) + 
-  geom_jitter(size = 1, col = "grey") +
-  facet_wrap(~wave)
-
-model <- glm(p6 ~ plot_treatment * wave, data = nfeeds_sel_m_effect, family = poisson(link = "log"))
-summary(model)
