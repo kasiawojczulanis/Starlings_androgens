@@ -44,7 +44,7 @@ nest_dt_females <- birdsID_df %>%
 nest_dt_males <- birdsID_df %>% 
   mutate(role = "male_parent",
          birdID = str_sub(male, 3, nchar(male))) %>% 
-  select(nest, year, hatch_date, wave, role, birdID, file_name, min_age) %>% 
+  select(nest, year, hatch_date, p6, p14, wave, role, birdID, file_name, min_age) %>% 
   distinct()
 
 nest_dt <- bind_rows(nest_dt_females, nest_dt_males)
@@ -143,7 +143,6 @@ rfid_alldt_temp_df4 <- rfid_alldt_temp_df4 %>%
 
 rfid_alldt_temp_df5 <- left_join(rfid_alldt_temp_df4, nest_dt, by = c("year", "birdID", "file_name"))
 
-
 # experiment/nest grouping
 
 rfid_alldt_temp_df5 <- rfid_alldt_temp_df5 %>% 
@@ -189,11 +188,22 @@ rfid_alldt_temp_df6 <- rfid_alldt_temp_df6 %>%
          ind_treatment = treatment) %>% 
   select(-sx_treat)
 
+
 # fix chicks age
-rfid_alldt_temp_df6 <- rfid_alldt_temp_df6 %>% 
+rfid_alldt_temp_df6x <- rfid_alldt_temp_df6 %>% 
+  mutate(p6 = if_else(is.na(p6) & !is.na(p14), p14, p6)) %>% 
   group_by(year, file_name) %>% 
-  fill(p6, .direction = "down")
+  fill(p6, .direction = "downup")
 
 
-saveRDS(rfid_alldt_temp_df6, "01_preprocessed_data.rds")
+# filtering the most external rec hours 
+# (for every per hour calculations it may be biased as being not a full hour of recording)
+rfid_alldt_temp_df7 <- rfid_alldt_temp_df6 %>%
+  group_by(file_name) %>% 
+  filter(hr_rec != 1,
+         hr_rec != max(hr_rec)) %>% 
+  ungroup()
+
+
+saveRDS(rfid_alldt_temp_df7, "01_preprocessed_data.rds")
 
